@@ -25,8 +25,7 @@ import static org.mockito.BDDMockito.then;
 //import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(RestDocumentationExtension.class)
@@ -59,14 +58,18 @@ public class BeerControllerTest {
     public void getBeer() throws Exception {
         given(beerService.getBeerById(any(UUID.class))).willReturn(validBeer);
 
-        mockMvc.perform(get("/api/v1/beer/{beerId}", validBeer.getId().toString()).accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/api/v1/beer/{beerId}", validBeer.getId().toString()).accept(MediaType.APPLICATION_JSON)
+                        .param("iscold", "yes"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.id", is(validBeer.getId().toString())))
                 .andExpect(jsonPath("$.beerName", is("Beer1")))
                 .andDo(document("v1/beer", pathParameters(
-                        parameterWithName("beerId").description("UUID of desired beer to get.")
-                )));
+                        parameterWithName("beerId").description("UUID of desired beer to get.")),
+                        requestParameters(
+                                parameterWithName("iscold").description("Is beer cold param")
+                        )
+                ));
     }
 
     @Test
